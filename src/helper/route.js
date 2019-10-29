@@ -4,14 +4,14 @@ const Handlebars = require('handlebars') //编译模版文件为html
 const promisify = require('util').promisify; //解决异步回调
 const stat = promisify(fs.stat)
 const readdir = promisify(fs.readdir)
-const config = require('../config/defaultConfig')
+// const config = require('../config/defaultConfig')
 const mime = require('./mime') //动态添加setheader 响应格式
 const compress = require('./compress')
 
 const tplPath = path.join(__dirname, '../template/dir.tpl') //获取绝对路径
 const source = fs.readFileSync(tplPath) 
 const template = Handlebars.compile(source.toString())
-module.exports = async function (req, res, filePath) {
+module.exports = async function (req, res, filePath, config) {
     // 异步解决
     try {
         const stats = await stat(filePath)
