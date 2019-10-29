@@ -6,6 +6,7 @@ const route = require('./helper/route')
 
 const serve = http.createServer((req, res) => {
     const filePath = path.join(conf.root, req.url) //拼接路径
+    console.log(filePath)
     // 异步解决
     route(req, res, filePath)
     // 回调解决

@@ -5,6 +5,8 @@ const promisify = require('util').promisify; //解决异步回调
 const stat = promisify(fs.stat)
 const readdir = promisify(fs.readdir)
 const config = require('../config/defaultConfig')
+const mime = require('./mime') //动态添加setheader 响应格式
+const compress = require('./compress')
 
 const tplPath = path.join(__dirname, '../template/dir.tpl') //获取绝对路径
 const source = fs.readFileSync(tplPath) 
@@ -15,11 +17,16 @@ module.exports = async function (req, res, filePath) {
         const stats = await stat(filePath)
         if(stats.isFile()){ //判断是 isFile() 文件还是 isDirectory() 文件夹
             res.statusCode = 200
-            res.setHeader('Content-Type', 'text/plain')
+            const contentType = mime(filePath)
+            res.setHeader('Content-Type', contentType)
             // fs.readFile(filePath, (err, data)=> { // 读取文件内容 返回客户端 慢。。
             //     res.end(data)
             // })
-            fs.createReadStream(filePath).pipe(res) //通过流的形式读取文件，返回给客户端
+            let rs = fs.createReadStream(filePath)
+            if(filePath.match(config.compress)){ //筛选出需要压缩的文件
+                rs =  compress(rs, req, res)
+            }
+            rs.pipe(res) //通过流的形式读取文件，返回给客户端
 
         }else if (stats.isDirectory()){
             //  改写前
